@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Online IDE</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Подключаем Ace Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Левая панель: редактор кода -->
+        <div class="code-editor">
+            <div id="editor"></div>
+        </div>
+
+        <!-- Правая панель: вывод результата -->
+        <div class="output-container">
+            <div class="output-header">
+                <h3>Результат выполнения:</h3>
+                <button onclick="clearOutput()">Очистить</button>
+            </div>
+            <pre id="output"></pre>
+            <div id="error"></div>
+        </div>
+
+        <!-- Нижняя панель: ввод данных -->
+        <div class="input-container">
+            <div class="input-header">
+                <h3>Входные данные:</h3>
+            </div>
+            <textarea id="input" placeholder="Введите данные для input()..."></textarea>
+            <button onclick="runCode()" class="run-button">Запустить код ▶</button>
+        </div>
+    </div>
+
+    <script>
+        // Инициализация редактора кода
+        const editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        editor.session.setMode("ace/mode/python");
+        editor.setOptions({
+            fontSize: "14px",
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true,
+            showLineNumbers: true,
+            showGutter: true,
+            highlightActiveLine: true
+        });
+
+        // Установим начальный код
+        editor.setValue(`# Введите ваш код на Python здесь
+print("Добро пожаловать в онлайн Python IDE!")
+
+# Пример использования input()
+name = input("Введите ваше имя: ")
+print(f"Привет, {name}!")`);
+
+        editor.clearSelection();
+
+        // Элементы DOM
+        const outputElement = document.getElementById('output');
+        const errorElement = document.getElementById('error');
+        const inputElement = document.getElementById('input');
+
+        // Функция для запуска кода
+        async function runCode() {
+            const code = editor.getValue();
+            const input = inputElement.value;
+
+            // Очистка предыдущих результатов
+            outputElement.textContent = 'Выполнение...';
+            errorElement.textContent = '';
+            errorElement.style.color = '#ff5555';
+
+            try {
+                const response = await fetch('/run', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        input: input
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Отображение результата
+                outputElement.textContent = data.output || '';
+                errorElement.textContent = data.error || '';
+
+                if (data.error) {
+                    errorElement.style.color = '#ff5555';
+                } else {
+                    errorElement.style.color = '#50fa7b';
+                    errorElement.textContent = 'Код выполнен успешно!';
+                }
+            } catch (err) {
+                errorElement.textContent = 'Ошибка соединения: ' + err.message;
+                console.error('Ошибка:', err);
+            }
+        }
+
+        // Функция для очистки вывода
+        function clearOutput() {
+            outputElement.textContent = '';
+            errorElement.textContent = '';
+        }
+
+        // Обработчик нажатия Ctrl+Enter
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                runCode();
+            }
+        });
+    </script>
+</body>
+</html>
