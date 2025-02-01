@@ -10,20 +10,6 @@
     <!-- Подключаем Ace Editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.js"></script>
-    <!-- Пользовательские стили для редактора -->
-    <style>
-        /* Переопределяем стили для фона строк в редакторе */
-        .ace_cobalt .ace_gutter {
-            background: transparent !important; /* Прозрачный фон для нумерации строк */
-        }
-        .ace_cobalt .ace_active-line,
-        .ace_cobalt .ace_gutter-active-line {
-            background: transparent !important; /* Прозрачный фон для активной строки */
-        }
-        .ace_cobalt .ace_marker-layer .ace_selection {
-            background: rgba(0, 120, 215, 0.3) !important; /* Полупрозрачный фон для выделенного текста */
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -56,9 +42,9 @@
     <script>
         // Инициализация редактора кода
         const editor = ace.edit("editor", {
-            theme: "ace/theme/cobalt",  // Тема Cobalt
+            theme: "ace/theme/Dracula",
             mode: "ace/mode/python",
-            fontSize: "16px",  // Увеличенный размер шрифта
+            fontSize: "18px",  // Увеличенный размер шрифта
             enableBasicAutocompletion: true,
             enableLiveAutocompletion: true,
             enableSnippets: true,
