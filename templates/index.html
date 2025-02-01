@@ -5,50 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python Online IDE</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Подключаем шрифты -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <!-- Подключаем Ace Editor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.js"></script>
+    <!-- Пользовательские стили для редактора -->
+    <style>
+        /* Переопределяем стили для фона строк в редакторе */
+        .ace_cobalt .ace_gutter {
+            background: transparent !important; /* Прозрачный фон для нумерации строк */
+        }
+        .ace_cobalt .ace_active-line,
+        .ace_cobalt .ace_gutter-active-line {
+            background: transparent !important; /* Прозрачный фон для активной строки */
+        }
+        .ace_cobalt .ace_marker-layer .ace_selection {
+            background: rgba(0, 120, 215, 0.3) !important; /* Полупрозрачный фон для выделенного текста */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <!-- Левая панель: редактор кода -->
         <div class="code-editor">
-            <div id="editor"></div>
+            <div id="editor" style="height: 100%; width: 100%;"></div>
         </div>
 
-        <!-- Правая панель: вывод результата -->
-        <div class="output-container">
-            <div class="output-header">
-                <h3>Результат выполнения:</h3>
-                <button onclick="clearOutput()">Очистить</button>
-            </div>
-            <pre id="output"></pre>
-            <div id="error"></div>
-        </div>
-
-        <!-- Нижняя панель: ввод данных -->
+        <!-- Правая панель: ввод данных -->
         <div class="input-container">
             <div class="input-header">
                 <h3>Входные данные:</h3>
             </div>
             <textarea id="input" placeholder="Введите данные для input()..."></textarea>
-            <button onclick="runCode()" class="run-button">Запустить код ▶</button>
         </div>
+
+        <!-- Нижняя панель: вывод результата -->
+        <div class="output-container">
+            <div class="output-header">
+                <h3>Результат выполнения:</h3>
+            </div>
+            <pre id="output"></pre>
+            <div id="error"></div>
+        </div>
+
+        <!-- Кнопка запуска -->
+        <button onclick="runCode()" class="run-button">Запустить код ▶</button>
     </div>
 
     <script>
         // Инициализация редактора кода
-        const editor = ace.edit("editor");
-        editor.setTheme("ace/theme/monokai");
-        editor.session.setMode("ace/mode/python");
-        editor.setOptions({
-            fontSize: "14px",
+        const editor = ace.edit("editor", {
+            theme: "ace/theme/cobalt",  // Тема Cobalt
+            mode: "ace/mode/python",
+            fontSize: "16px",  // Увеличенный размер шрифта
             enableBasicAutocompletion: true,
             enableLiveAutocompletion: true,
             enableSnippets: true,
             showLineNumbers: true,
             showGutter: true,
-            highlightActiveLine: true
+            highlightActiveLine: true,
+            autoScrollEditorIntoView: true,
+            maxLines: Infinity // Убираем ограничение на количество строк
         });
 
         // Установим начальный код
@@ -74,7 +92,7 @@ print(f"Привет, {name}!")`);
             // Очистка предыдущих результатов
             outputElement.textContent = 'Выполнение...';
             errorElement.textContent = '';
-            errorElement.style.color = '#ff5555';
+            errorElement.style.color = 'var(--error-color)';
 
             try {
                 const response = await fetch('/run', {
@@ -99,21 +117,15 @@ print(f"Привет, {name}!")`);
                 errorElement.textContent = data.error || '';
 
                 if (data.error) {
-                    errorElement.style.color = '#ff5555';
+                    errorElement.style.color = 'var(--error-color)';
                 } else {
-                    errorElement.style.color = '#50fa7b';
+                    errorElement.style.color = 'var(--success-color)';
                     errorElement.textContent = 'Код выполнен успешно!';
                 }
             } catch (err) {
                 errorElement.textContent = 'Ошибка соединения: ' + err.message;
                 console.error('Ошибка:', err);
             }
-        }
-
-        // Функция для очистки вывода
-        function clearOutput() {
-            outputElement.textContent = '';
-            errorElement.textContent = '';
         }
 
         // Обработчик нажатия Ctrl+Enter
